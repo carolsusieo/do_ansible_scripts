@@ -1,0 +1,12 @@
+---
+- name: Install cors
+  command: npm install cors
+
+- name: Install dotenv
+  command: npm install dotenv
+
+- name: Install express
+  command: npm install express
+
+- name: Install mongoose
+  command: npm install mongoose

@@ -1,0 +1,28 @@
+---
+
+- include: create_swap_file.yml
+  when: create_swap_file
+  tags: swap
+
+- name: Perform apt dist-upgrade
+  apt: update_cache={{ update_apt_cache }}
+       upgrade=dist
+  tags:
+    - packages
+    - skip_ansible_lint
+
+- name: Install base packages
+  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest
+  with_items:
+    #- locales
+    - software-properties-common
+    - debconf-utils
+    - build-essential
+    - libcurl4 #needed for ubuntu18 - mongodb
+    #- acl
+    #- ntp
+    #- htop
+    - git
+  tags:
+    - packages
+    - packages.security

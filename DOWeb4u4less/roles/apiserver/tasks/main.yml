@@ -1,0 +1,13 @@
+---
+
+- include: install_additional_packages.yml
+  tags: packages
+
+- include: set_file_permissions.yml
+  tags: deploy
+
+- include: setup_environment.yml
+
+- include: setup_apiserver.yml
+  become: no
+  tags: deploy

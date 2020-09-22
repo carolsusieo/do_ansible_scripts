@@ -1,0 +1,65 @@
+---
+
+- name: "Add node 10 (LTS) to the apt sources list."
+  shell: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+
+- name: Install additional packages
+  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest
+  with_items:
+    - nodejs
+
+- name: Check whether /usr/bin/node exists
+  stat:
+    path: /usr/bin/node
+  register: usr_bin_node_exists
+
+- name: Symlink nodejs to `node`
+  file: src=/usr/bin/nodejs dest=/usr/bin/node state=link
+  when: usr_bin_node_exists.stat.exists == False
+
+- name: Check whether /usr/bin/npm exists
+  stat:
+    path: /usr/bin/npm
+  register: usr_bin_npm_exists
+
+- name: Make sure npm is installed
+  apt:
+    name: npm
+    update_cache: "{{ update_apt_cache }}"
+  when: usr_bin_npm_exists.stat.exists == False
+
+- name: Make sure the latest npm is installed
+  command: npm install -g npm
+
+- name: Install npm packages.
+  command: npm install -g yarn cross-env pm2
+
+- name: Install React
+  command: npm install react
+
+- name: Install React scripts
+  command: npm install react-scripts
+
+- name: Install axios
+  command: npm install axios
+
+- name: Install bootstrap
+  command: npm install bootstrap
+
+- name: Install dotenv
+  command: npm install dotenv
+
+- name: Install font-awesome
+  command: npm install font-awesome
+
+- name: Install node-sass
+  command: npm install -g --unsafe-perm node-sass
+
+- name: Install react-bootstrap
+  command: npm install react-bootstrap
+
+- name: Install react-dom
+  command: npm install react-dom
+
+- name: Install react-scroll
+  command: npm install react-scroll

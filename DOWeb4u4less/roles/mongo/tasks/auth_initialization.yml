@@ -1,0 +1,48 @@
+---
+- name: Use different mongod.conf for auth initialization
+  template:
+    src: mongod_init.conf.j2
+    dest: /etc/mongod.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - mongodb restart
+    - wait when mongodb is started on localhost
+
+- name: Flush all handlers at this point
+  meta: flush_handlers
+
+- name: create administrative user "{{ mongodb_user_admin_name }}"
+  mongodb_user:
+    database: admin
+    name: "{{ mongodb_user_admin_name }}"
+    password: "{{ mongodb_user_admin_password }}"
+    update_password: "{{ mongodb_user_update_password }}"
+    roles: userAdminAnyDatabase, readWriteAnyDatabase
+    login_port: "{{ mongodb_net_port }}"
+  no_log: true
+
+- name: create administrative user "{{ mongodb_root_admin_name }}"
+  mongodb_user:
+    database: admin
+    name: "{{ mongodb_root_admin_name  }}"
+    password: "{{ mongodb_root_admin_password }}"
+    update_password: "{{ mongodb_user_update_password }}"
+    roles: root
+    login_port: "{{ mongodb_net_port }}"
+  no_log: true
+
+- name: Move back mongod.conf
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - mongodb restart
+    - wait when mongodb is started
+
+- name: Flush all handlers at this point
+  meta: flush_handlers

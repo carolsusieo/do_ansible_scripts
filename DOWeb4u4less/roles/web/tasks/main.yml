@@ -1,0 +1,22 @@
+---
+
+- include: install_additional_packages.yml
+  tags: packages
+
+- include: setup_known_hosts.yml
+  when: use_ssh_agent_forwarding is defined and use_ssh_agent_forwarding == True
+
+- include: create_users_and_groups.yml
+
+- include: set_file_permissions.yml
+  tags: deploy
+
+- include: setup_environment.yml
+
+- include: setup_application.yml
+  become: no
+  tags: deploy
+
+- include: save_application.yml
+  become: no
+  tags: deploy

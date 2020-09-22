@@ -1,0 +1,37 @@
+---
+original_user: web4u4less
+
+server_user_password: "{{ sudo_user_password }}"
+
+project_name: odiorne
+application_name: "{{ project_name }}"
+
+
+
+# Git settings.
+git_repo: "{{ vault_git_repo }}"
+
+
+setup_git_repo: yes
+setup_apiserver_repo: yes
+
+git_branch: master
+
+sudo_user_password: "{{ vault_sudo_user_password }}"
+
+# Nginx settings
+nginx_cache_static: yes
+
+
+
+#pm2 values
+pm2_user: "{{ project_name }}"
+pm2_group: "webapps"
+
+
+#ports
+web_port: 8003  # different than other app
+
+#same as other app
+apiserver_port: 3002
+mongodb_net_port: 27017

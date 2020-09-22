@@ -1,0 +1,47 @@
+---
+
+- name: Setup the apiserver Git repo
+  git: repo={{ apiserver_repo }}
+       version={{ git_branch }}
+       dest={{ apiserver_path }}
+       accept_hostkey=yes
+       force=yes
+  when: setup_apiserver_repo is defined and setup_apiserver_repo
+  tags: git
+  become: yes
+
+# TODO: This should be yarn install --production but our package.json is incorrect.
+- name: Install dependencies (yarn)
+  command: yarn
+  args:
+    chdir: "{{ apiserver_path }}"
+  become: yes
+
+- name: Create the apiserver .env configuration file
+  template: src=envfile.j2
+            dest="{{ apiserver_path }}/.env"
+            owner={{ pm2_user }}
+            group={{ pm2_group }}
+            mode=0664
+            force=yes
+            unsafe_writes=yes
+  become: yes
+
+- name: Stop Server
+  command: pm2 stop all chdir={{ apiserver_path }}
+  ignore_errors: yes
+
+- name: Delete Server
+  command: pm2 delete all chdir={{ apiserver_path }}
+  ignore_errors: yes
+
+- name: Kill Server processes
+  command: pm2 kill chdir={{ apiserver_path }}
+
+- name: Start apiserver
+  command: "{{ pm2_api_command }}"
+  args:
+    chdir: "{{ apiserver_path }}"
+
+- name: Save APP
+  command: pm2 save

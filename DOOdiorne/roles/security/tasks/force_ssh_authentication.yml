@@ -1,0 +1,21 @@
+---
+
+- name: Add authorized_keys for the user
+  authorized_key: user={{ server_user }} key="{{ lookup('file', item) }}"
+  with_items:
+    - "{{ user_public_keys }}"
+
+- name: Disallow password authentication
+  lineinfile: dest=/etc/ssh/sshd_config
+              regexp="^PasswordAuthentication"
+              line="PasswordAuthentication no"
+              state=present
+  notify: restart ssh
+
+#want to add the user to  the line that is already there.
+- name: Allow ssh only this user
+  replace:
+    dest: /etc/ssh/sshd_config
+    regexp: '^(AllowUsers(?!.*{{ server_user }}).*)"$'
+    replace: '\1 {{ server_user }}""'
+  notify: restart ssh

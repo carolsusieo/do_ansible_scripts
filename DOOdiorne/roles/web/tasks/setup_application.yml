@@ -1,0 +1,47 @@
+---
+
+- name: Setup the Git repo
+  git: repo={{ git_repo }}
+       version={{ git_branch }}
+       dest={{ project_path }}
+       accept_hostkey=yes
+       force=yes
+  when: setup_git_repo is defined and setup_git_repo
+  tags: git
+  become: yes
+
+# TODO: This should be yarn install --production but our package.json is incorrect.
+- name: Install dependencies (yarn)
+  command: yarn
+  args:
+    chdir: "{{ project_path }}"
+  become: yes
+
+- name: Create the web app .env configuration file
+  template: src=filetest.j2
+            dest="{{ project_path }}/.env"
+            backup=yes
+  become: yes
+
+- name: Build the application
+  command: "{{ build_command }}"
+  args:
+    chdir: "{{ project_path }}"
+  become: yes
+
+- name: Stop APP
+  command: pm2 stop all chdir={{ project_path }}
+  ignore_errors: yes
+
+- name: Delete APP
+  command: pm2 delete all chdir={{ project_path }}
+  ignore_errors: yes
+
+- name: Kill processes
+  command: pm2 kill chdir={{ project_path }}
+
+
+- name: Start APP
+  command: "{{ pm2_command }}"
+  args:
+    chdir: "{{ project_path }}"

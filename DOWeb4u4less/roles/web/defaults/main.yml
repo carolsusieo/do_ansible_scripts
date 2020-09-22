@@ -1,0 +1,32 @@
+---
+
+# SSH settings.
+ssh_known_hosts_command: "ssh-keyscan -H -T 10"
+ssh_known_hosts_file: "/etc/ssh/ssh_known_hosts"
+ssh_known_hosts:
+  - github.com
+
+
+# Application settings.
+environment_path: "/webapps/{{ application_name }}"
+project_path: "{{ environment_path }}/{{ project_name }}"
+application_log_dir: "{{ environment_path }}/logs"
+application_log_file: "{{ application_log_dir }}/application.log"
+application_cache_dir: "{{ environment_path }}/cache"
+build_command: "npm run-script build"
+nodejs_port: "{{ web_port }}"
+server_port: "{{ apiserver_port }}"
+#perhpas in future this js file would be one level up
+
+pm2_command: "pm2 start {{ environment_path }}/{{ project_name }}/{{ project_name }}.config.js --name {{ project_name }}"
+pm2_server_command: "pm2 start {{ environment_path }}/{{ sproject_name }}/{{ sproject_name }}.config.js --name {{ sproject_name }}"
+
+# Nginx settings.
+nginx_access_log_file: "{{ application_log_dir }}/nginx_access.log"
+nginx_error_log_file: "{{ application_log_dir }}/nginx_error.log"
+nginx_static_dir: "{{ project_path }}/build/static/"
+
+
+# PM2 settings.config.js
+pm2_user: "{{ application_name }}"
+pm2_group: webapps

@@ -1,0 +1,28 @@
+---
+
+- name: Create the application log folder
+  file: path={{ application_log_dir }}
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        mode=0774
+        state=directory
+
+- name: Create (or retain) the application log file
+  copy: content=""
+        dest={{ application_log_file }}
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        mode=0664
+        force=no
+
+- name: Create the maintenance page
+  template: src=maintenance_off.html
+            dest={{ environment_path }}/maintenance_off.html
+            mode=0664
+
+- name: Create the proxy cache directory
+  file: path={{ application_cache_dir }}
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        mode=0774
+        state=directory

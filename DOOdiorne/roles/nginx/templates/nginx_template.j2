@@ -1,0 +1,66 @@
+
+#
+# Redirect all non-encrypted to encrypted
+#
+server {
+    server_name          {{ nginx_server_name }};
+    listen               80;
+    listen               [::]:80;
+    if ($host = odiorne.info){
+      return 301 https://$host$request_uri;
+    }
+    return 404;
+}
+
+server {
+    server_name         {{ nginx_server_name }};
+    listen              443 ssl;
+    listen              [::]:443 ssl;
+
+    root {{ environment_path }}/{{ application_name }}/build;
+    index index.html;
+
+    {% if nginx_use_letsencrypt %}
+    ssl_certificate     {{ letsencrypt_dir }}/{{ letsencrypt_cert_filename }};
+    ssl_certificate_key {{ letsencrypt_dir }}/{{ letsencrypt_privkey_filename }};
+    {% else %}
+    ssl_certificate     {{ nginx_ssl_dest_dir }}/{{ application_name }}.crt;
+    ssl_certificate_key {{ nginx_ssl_dest_dir }}/{{ application_name }}.key;
+    {% endif %}
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    {% if nginx_strong_dh_group %}
+    ssl_dhparam          /etc/ssl/certs/dhparams.pem;
+    {% endif %}
+
+
+    access_log {{ nginx_access_log_file }};
+    error_log {{ nginx_error_log_file }};
+
+    location /static/ {
+        alias   {{ nginx_static_dir }};
+        {% if nginx_cache_static %}
+        expires {{ nginx_static_cache_expiry_period }};
+        add_header Cache-Control "public";
+        {% endif %}
+    }
+
+    {% if nginx_include_favicon %}
+    # alias favicon.* to static
+    location ~ ^/favicon.(\w*)$ {
+        alias {{ nginx_favicon_dir }}/favicon\.$1;
+    }
+    {% endif %}
+
+
+    location / {
+        if (-f {{ environment_path }}/maintenance_on.html) {
+            return 503;
+        }
+        try_files $uri /index.html =404;
+    }
+
+    error_page 503 /maintenance_on.html;
+    location = /maintenance_on.html {
+        root {{ environment_path }}/;
+    }
+}

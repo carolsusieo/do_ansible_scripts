@@ -1,0 +1,43 @@
+---
+
+- name: Setup the Server Git repo
+  git: repo={{ server_git_repo }}
+       version={{ git_branch }}
+       dest={{ sproject_path }}
+       accept_hostkey=yes
+       force=yes
+  apt:
+    name: npm
+    update_cache: "{{ update_apt_cache }}"
+  when: setup_server_git_repo is defined and setup_server_git_repo
+  tags: git.env
+  become: yes
+
+# TODO: This should be yarn install --production but our package.json is incorrect.
+- name: Install dependencies (yarn)
+  command: yarn
+  args:
+    chdir: "{{ sproject_path }}"
+  become: yes
+
+- name: Create the server .env configuration file for the server
+  template: src=serverenv.j2
+            dest="{{ sproject_path }}/.env"
+            backup=yes
+
+- name: Stop server
+  command: pm2 stop all chdir={{ sproject_path }}
+  ignore_errors: yes
+
+- name: Delete server
+  command: pm2 delete all chdir={{ sproject_path }}
+  ignore_errors: yes
+
+- name: Kill server processes
+  command: pm2 kill chdir={{ sproject_path }}
+
+
+- name: Start server
+  command: "{{ pm2_server_command }}"
+  args:
+    chdir: "{{ sproject_path }}"

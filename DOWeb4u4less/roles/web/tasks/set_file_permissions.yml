@@ -1,0 +1,10 @@
+---
+
+- name: Ensure that the application file permissions are set properly
+  file: path={{ environment_path }}
+        recurse=yes
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        state=directory
+        
+  changed_when: False

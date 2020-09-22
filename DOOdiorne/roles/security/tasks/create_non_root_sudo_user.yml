@@ -1,0 +1,14 @@
+---
+#add a user - with the new username same as the application
+- name: Add user
+  user: name="{{ server_user }}" shell="{{ shell }}" password="{{ server_user_password }}"
+
+- name: Install sudo -
+  apt: name=sudo update_cache={{ update_apt_cache }} state=present cache_valid_time=86400
+
+
+- name: Add user to sudoers
+  lineinfile: dest=/etc/sudoers
+              regexp="{{ server_user }} ALL"
+              line="{{ server_user }} ALL=(ALL) NOPASSWD:ALL"
+              state=present

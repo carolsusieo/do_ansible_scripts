@@ -1,0 +1,9 @@
+---
+
+# server settings.
+senvironment_path: "/webapps/{{ apiserver_name }}"
+apiserver_path: "{{ senvironment_path }}/{{ apiserver_name }}"
+apiserver_log_dir: "{{ senvironment_path }}/logs"
+apiserver_log_file: "{{ apiserver_log_dir }}/{{ apiserver_name }}.log"
+
+pm2_api_command: "pm2 start {{ senvironment_path }}/{{ apiserver_name }}/{{ apiserver_name }}.config.js --name {{ apiserver_name }}"

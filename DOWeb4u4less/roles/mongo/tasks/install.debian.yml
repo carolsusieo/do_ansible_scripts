@@ -1,0 +1,50 @@
+---
+- name: Import MongoDB public GPG key
+  apt_key: keyserver={{ mongodb_apt_keyserver }} id= {{ mongodb_apt_key_id }} state=present
+
+- name: Create MongoDB package list file
+  shell: echo "deb http://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/{{ mongodb_version }} multiverse" > /etc/apt/sources.list.d/mongodb-org-{{ mongodb_version }}.list
+  become: yes
+
+- name: Update cache
+  apt: update_cache=yes allow_unauthenticated=yes force_apt_get=yes
+
+- name: Install MongoDB metapackage
+  apt: name=mongodb-org state=present allow_unauthenticated=yes
+  become: yes
+
+- name: Modify MongoDB server configuration
+  shell: sed -ie "/bindIp/ s/{{ mongodb_net_bindip }}/0.0.0.0/" /etc/mongod.conf
+  notify:
+    - start mongodb
+  become: yes
+
+
+- name: Install PyMongo package
+  apt:
+    name: python-pymongo
+  when: not mongodb_pymongo_from_pip
+
+- name: Install PIP
+  apt:
+    pkg:
+      - python-dev
+      - python-pip
+      - python3-dev
+      - python3-pip
+    update_cache: yes
+    state: present
+  when: mongodb_pymongo_from_pip | bool
+
+- name: Install setuptools (required for ansible 2.7+)
+  apt:
+    pkg:
+      - python-setuptools
+  when: mongodb_pymongo_from_pip | bool
+
+- name: Install PyMongo from PIP
+  pip:
+    name: pymongo
+    state: "{{ mongodb_pymongo_pip_version is defined | ternary('present', 'latest') }}"
+    version: "{{ mongodb_pymongo_pip_version | default(omit) }}"
+  when: mongodb_pymongo_from_pip | bool

@@ -1,0 +1,10 @@
+---
+
+- name: Ensure that the apiserver file permissions are set properly
+  file: path={{ senvironment_path }}
+        recurse=yes
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        state=directory
+
+  changed_when: False

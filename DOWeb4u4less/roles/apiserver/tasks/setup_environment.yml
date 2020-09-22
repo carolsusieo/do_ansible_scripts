@@ -1,0 +1,16 @@
+---
+
+- name: Create the apiserver log folder
+  file: path={{ apiserver_log_dir }}
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        mode=0774
+        state=directory
+
+- name: Create (or retain) the apiserver log file
+  copy: content=""
+        dest={{ apiserver_log_file }}
+        owner={{ pm2_user }}
+        group={{ pm2_group }}
+        mode=0664
+        force=no
